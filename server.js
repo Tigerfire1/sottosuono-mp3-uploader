@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
+    limits: { fileSize: 25 * 1024 * 1024 } // 25MB file size limit
 });
 
 // Health check endpoint
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
     res.send('Server is live and listening!');
 });
 
-// Upload route
+// Upload route (accepts both / and /api/upload-audio)
 app.post(['/', '/api/upload-audio'], upload.single('audio'), async (req, res) => {
     try {
         const { igHandle, message } = req.body;
@@ -31,7 +31,7 @@ app.post(['/', '/api/upload-audio'], upload.single('audio'), async (req, res) =>
             return res.status(400).json({ error: 'No audio file provided.' });
         }
 
-        // Send via Resend HTTP API (Port 443 - Bypasses Render's SMTP block)
+        // Send email via Resend HTTP API (Port 443 - Bypasses Render SMTP blocking)
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -66,7 +66,7 @@ app.post(['/', '/api/upload-audio'], upload.single('audio'), async (req, res) =>
     }
 });
 
-// Dynamic port assignment
+// Dynamic port assignment for Render
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
