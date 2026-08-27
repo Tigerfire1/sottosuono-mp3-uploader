@@ -1,3 +1,6 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first'); // Forces IPv4 to fix ENETUNREACH on Render
+
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -17,7 +20,7 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB file size limit
 });
 
-// Configure Nodemailer with environment variables from Render
+// Configure Nodemailer with SSL on Port 465
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -33,8 +36,8 @@ app.get('/', (req, res) => {
     res.send('Server is live and listening!');
 });
 
-// Upload route matching Framer
-app.post('/api/upload-audio', upload.single('audio'), async (req, res) => {
+// Upload route matching Framer (accepts both / and /api/upload-audio)
+app.post(['/', '/api/upload-audio'], upload.single('audio'), async (req, res) => {
     try {
         const { igHandle, message } = req.body;
         const audioFile = req.file;
